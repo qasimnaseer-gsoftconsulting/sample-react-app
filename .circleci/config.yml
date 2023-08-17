@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  test-and-build:
+  test-build-and-deploy:
     docker:
       - image: circleci/node:14 # Choose an appropriate Node.js version
     steps:
@@ -26,10 +26,19 @@ jobs:
               npm run build
             else
               echo "Tests failed, skipping build."
+              exit 1
             fi
+      - run:
+          name: Deploy to EC2
+          command: |
+            chmod 400 $EC2_PRIVATE_KEY
+            ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "rm -rf /home/ec2-user/*"
+            scp -i $EC2_PRIVATE_KEY -r build/* $EC2_USERNAME@$EC2_PUBLIC_IP:/home/ec2-user/
+            ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "bash /home/ec2-user/deploy-script.sh"
 
 workflows:
   version: 2
-  test-and-build-workflow:
+  test-build-and-deploy-workflow:
     jobs:
-      - test-and-build
+      - test-build-and-deploy
+
