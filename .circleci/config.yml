@@ -32,7 +32,7 @@ jobs:
           name: Deploy to EC2
           command: |
             chmod 400 /home/circleci/project/.circleci/react-app-key-pair.pem
-#           ssh -i /home/circleci/project/.circleci/react-app-key-pair.pem ec2-user@ec2-3-12-150-252.us-east-2.compute.amazonaws.com
+            ssh -i "/home/circleci/project/.circleci/react-app-key-pair.pem" ec2-user@ec2-3-12-150-252.us-east-2.compute.amazonaws.com
 #           sudo apt update
 #           sudo apt upgrade -y
 
