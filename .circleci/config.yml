@@ -4,7 +4,7 @@ jobs:
   test-build-and-deploy:
     docker:
       - image: circleci/node:14 # Choose an appropriate Node.js version
-    steps:
+    steps: 
       - checkout
       - restore_cache:
           keys:
