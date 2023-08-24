@@ -1,14 +1,55 @@
-version: 2.1
+# version: 2.1
 
+# jobs:
+#   test-build-and-deploy:
+#     docker:
+#       - image: circleci/node:14 # Choose an appropriate Node.js version
+#     steps:
+#       - checkout
+#       - restore_cache:
+#           keys:
+#             - v1-dependencies-{{ checksum "package.json" }}
+#       - run:
+#           name: Install Dependencies
+#           command: npm install
+#       - save_cache:
+#           paths:
+#             - node_modules
+#           key: v1-dependencies-{{ checksum "package.json" }}
+#       - run:
+#           name: Run Tests
+#           command: npm test
+#       - run:
+#           name: Build React App
+#           command: |
+#             if [ $? -eq 0 ]; then
+#               npm run build
+#             else
+#               echo "Tests failed, skipping build."
+#               exit 1
+#             fi
+#       - run:
+#           name: Deploy to EC2
+#           command: |
+#             chmod 400 /home/circlecli/project/key-pair/react-app-key-pair.pem
+#             ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "rm -rf /home/ec2-user/*"
+#             scp -i $EC2_PRIVATE_KEY -r build/* $EC2_USERNAME@$EC2_PUBLIC_IP:/home/ec2-user/
+#             ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "bash /home/ec2-user/deploy-script.sh"
+
+# workflows:
+#   version: 2
+#   test-build-and-deploy-workflow:
+#     jobs: 
+#       - test-build-and-deploy
+
+
+version: 2.1
 jobs:
-  test-build-and-deploy:
+  build:
     docker:
-      - image: circleci/node:14 # Choose an appropriate Node.js version
+      - image: circleci/node:14 # Use an appropriate Node.js version
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
       - run:
           name: Install Dependencies
           command: npm install
@@ -21,23 +62,37 @@ jobs:
           command: npm test
       - run:
           name: Build React App
-          command: |
-            if [ $? -eq 0 ]; then
-              npm run build
-            else
-              echo "Tests failed, skipping build."
-              exit 1
-            fi
+          command: npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build/
+
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - attach_workspace:
+          at: /workspace
       - run:
           name: Deploy to EC2
           command: |
-            chmod 400 /home/circlecli/project/key-pair/react-app-key-pair.pem
-            ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "rm -rf /home/ec2-user/*"
-            scp -i $EC2_PRIVATE_KEY -r build/* $EC2_USERNAME@$EC2_PUBLIC_IP:/home/ec2-user/
-            ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "bash /home/ec2-user/deploy-script.sh"
+            if [ "$CIRCLE_JOB" == "build" ]; then
+              chmod 400 /workspace/key-pair/react-app-key-pair.pem
+              scp -i /workspace/key-pair/react-app-key-pair.pem -r /workspace/build/* ec2-user@EC2_PUBLIC_IP:/home/ec2-user/
+              ssh -i /workspace/key-pair/react-app-key-pair.pem ec2-user@EC2_PUBLIC_IP "bash /home/ec2-user/deploy-script.sh"
+            else
+              echo "Deployment skipped due to unsuccessful build."
+            fi
 
 workflows:
   version: 2
-  test-build-and-deploy-workflow:
-    jobs: 
-      - test-build-and-deploy
+  build-deploy-workflow:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master # or specify the branch you want to deploy from
