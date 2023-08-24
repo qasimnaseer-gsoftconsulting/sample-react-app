@@ -1,18 +1,9 @@
 version: 2.1
-orbs:
-  aws-cli: circleci/aws-cli@2.0.3
+
 jobs:
-  aws-cli:
-    docker:
-      # replace with your preferred image
-      - image: cimg/base:stable
-    steps:
-      - aws-cli/install:
-          disable-aws-pager: true 
-          override-installed: false 
   test-build-and-deploy:
     docker:
-      - image: cimg/base:20 # Choose an appropriate Node.js version
+      - image: circleci/node:14 # Choose an appropriate Node.js version
     steps:
       - checkout
       - restore_cache:
@@ -40,16 +31,12 @@ jobs:
       - run:
           name: Deploy to EC2
           command: |
-            chmod 400 /home/circlecli/project/key-pair/react-app-key-pair.pem
-            ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "rm -rf /home/ec2-user/*"
-            scp -i $EC2_PRIVATE_KEY -r build/* $EC2_USERNAME@$EC2_PUBLIC_IP:/home/ec2-user/
-            ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "bash /home/ec2-user/deploy-script.sh"
+           chmod 400 /workspace/key-pair/react-app-key-pair.pem
+           scp -i /workspace/key-pair/react-app-key-pair.pem -r /workspace/build/* ec2-user@EC2_PUBLIC_IP:/home/ec2-user/
+           ssh -i /workspace/key-pair/react-app-key-pair.pem ec2-user@EC2_PUBLIC_IP "bash /home/ec2-user/deploy-script.sh"
 
 workflows:
   version: 2
   test-build-and-deploy-workflow:
     jobs: 
       - test-build-and-deploy
-      - aws-cli:
-          requires:
-            - test-build-and-deploy
