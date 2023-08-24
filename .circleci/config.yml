@@ -31,7 +31,7 @@ jobs:
       - run:
           name: Deploy to EC2
           command: |
-            chmod 755 /home/circlecli/.circleci/react-app-key-pair.pem
+            chmod 400 /home/circlecli/.circleci/react-app-key-pair.pem
             ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "rm -rf /home/ec2-user/*"
             scp -i $EC2_PRIVATE_KEY -r build/* $EC2_USERNAME@$EC2_PUBLIC_IP:/home/ec2-user/
             ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "bash /home/ec2-user/deploy-script.sh"
