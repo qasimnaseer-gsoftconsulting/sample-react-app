@@ -49,7 +49,7 @@ workflows:
   version: 2
   test-build-and-deploy-workflow:
     jobs: 
-      - aws-cli
-      - test-build-and-deploy:
+      - test-build-and-deploy
+      - aws-cli:
           requires:
-            - aws-cli
+            - test-build-and-deploy
