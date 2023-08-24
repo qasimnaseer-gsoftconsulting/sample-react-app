@@ -31,9 +31,9 @@ jobs:
       - run:
           name: Deploy to EC2
           command: |
-           chmod 400 /workspace/key-pair/react-app-key-pair.pem
-           scp -i /workspace/key-pair/react-app-key-pair.pem -r /workspace/build/* ec2-user@EC2_PUBLIC_IP:/home/ec2-user/
-           ssh -i /workspace/key-pair/react-app-key-pair.pem ec2-user@EC2_PUBLIC_IP "bash /home/ec2-user/deploy-script.sh"
+           chmod 400 /home/circleci/project/key-pair/react-app-key-pair.pem
+           scp -i /home/circleci/project/key-pair/react-app-key-pair.pem -r /home/circleci/project/build/* ec2-user@ec2-3-12-150-252:/home/ec2-user/
+           ssh -i /home/circleci/project/key-pair/react-app-key-pair.pem ec2-user@ec2-3-12-150-252 "bash /home/ec2-user/deploy-script.sh"
 
 workflows:
   version: 2
