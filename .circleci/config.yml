@@ -12,7 +12,7 @@ jobs:
           override-installed: false 
   test-build-and-deploy:
     docker:
-      - image: cimg/base:stable # Choose an appropriate Node.js version
+      - image: cimg/base:20 # Choose an appropriate Node.js version
     steps:
       - checkout
       - restore_cache:
