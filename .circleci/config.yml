@@ -32,7 +32,7 @@ jobs:
           name: Deploy to EC2
           command: |
             sudo chmod 400 /home/circleci/project/key-pair/react-app-key-pair.pem
-            scp -o StrictHostKeyChecking=no -i /home/circleci/project/key-pair/react-app-key-pair.pem -r /home/circleci/project/* ec2-user@ec2-3-12-150-252.us-east-2.compute.amazonaws.com:/home/ec2-user/
+            scp -o StrictHostKeyChecking=no -i /home/circleci/project/key-pair/react-app-key-pair.pem -r /home/circleci/project/* ec2-user@ec2-3-12-150-252.us-east-2.compute.amazonaws.com:/home/ec2-user/usr/share/nginx/html/
             
             ssh -o StrictHostKeyChecking=no -i /home/circleci/project/key-pair/react-app-key-pair.pem ec2-user@ec2-3-12-150-252.us-east-2.compute.amazonaws.com "bash cd ec2-user"
 workflows:
