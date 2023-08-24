@@ -1,9 +1,18 @@
 version: 2.1
-
+orbs:
+  aws-cli: circleci/aws-cli@2.0.3
 jobs:
+  aws-cli:
+    docker:
+      # replace with your preferred image
+      - image: cimg/base:stable
+    steps:
+      - aws-cli/install:
+          disable-aws-pager: true 
+          override-installed: false 
   test-build-and-deploy:
     docker:
-      - image: circleci/node:14 # Choose an appropriate Node.js version
+      - image: cimg/base:stable # Choose an appropriate Node.js version
     steps:
       - checkout
       - restore_cache:
@@ -40,4 +49,7 @@ workflows:
   version: 2
   test-build-and-deploy-workflow:
     jobs: 
-      - test-build-and-deploy
+      - aws-cli
+      - test-build-and-deploy:
+          requires:
+            - aws-cli
