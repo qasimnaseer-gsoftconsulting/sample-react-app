@@ -32,6 +32,7 @@ jobs:
           name: Deploy to EC2
           command: |
             chmod 400 /home/circleci/project/.circleci/react-app-key-pair.pem
+            ssh-keyscan -H hostname >> ~/.ssh/known_hosts
             ssh-keygen -R hostname
             ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub
             ssh -i $EC2_PRIVATE_KEY $EC2_USERNAME@$EC2_PUBLIC_IP "rm -rf /home/ec2-user/*"
