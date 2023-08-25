@@ -1,0 +1,52 @@
+version: 2.1
+
+jobs:
+  test-build-and-deploy:
+    docker:
+      - image: circleci/node:14 # Choose an appropriate Node.js version
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Run Tests
+          command: npm test
+      - run:
+          name: Build React App
+          command: |
+            if [ $? -eq 0 ]; then
+              npm run build
+            else
+              echo "Tests failed, skipping build."
+              exit 1
+            fi
+          environment:
+            CI: true # Set an environment variable to indicate running in CI
+      - run:
+          name: Deploy to EC2
+          command: |
+            if [ $? -eq 0 ]; then
+              sudo chmod 400 /home/circleci/project/key-pair/react-app-key-pair.pem
+              scp -o StrictHostKeyChecking=no -i /home/circleci/project/key-pair/react-app-key-pair.pem -r /home/circleci/project/build/* ec2-user@ec2-3-12-150-252.us-east-2.compute.amazonaws.com:/home/ec2-user/my_website/
+              ssh -o StrictHostKeyChecking=no -i /home/circleci/project/key-pair/react-app-key-pair.pem ec2-user@ec2-3-12-150-252.us-east-2.compute.amazonaws.com "sudo systemctl restart nginx"
+            else
+              echo "Build failed, skipping deployment."
+              exit 1
+            fi
+
+workflows:
+  version: 2
+  test-build-and-deploy-workflow:
+    jobs:
+      - test-build-and-deploy:
+          filters:
+            branches:
+              only: main
