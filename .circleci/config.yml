@@ -1,16 +1,18 @@
 version: 2.1
 
 jobs:
-  eslint:
+  build:
     docker:
       - image: circleci/node:16
     working_directory: ~/project
-
     steps:
       - checkout
 
+      - setup_remote_docker:
+          version: 22.0.1
+
       - run:
-          name: Setup Node.js
+          name: Install Node.js
           command: |
             curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
             sudo apt-get install -y nodejs
@@ -29,14 +31,14 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       - run:
-          name: Run ESLint
-          command: npm run lint:fix
+          name: Build
+          command: npm run build --if-present
 
 workflows:
   version: 2
-  eslint_workflow:
+  build_workflow:
     jobs:
-      - eslint
+      - build
 
 
 
