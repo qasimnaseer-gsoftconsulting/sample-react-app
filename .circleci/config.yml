@@ -6,7 +6,7 @@ version: 2.1
 jobs:
   test-build-and-deploy:
     docker:
-      - image: circleci/node:14 # Choose an appropriate Node.js version
+      - image: circleci/node:16 # Choose an appropriate Node.js version
     steps:
       - checkout
       - restore_cache:
