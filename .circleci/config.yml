@@ -37,9 +37,9 @@ jobs:
           name: Deploy to EC2
           command: |
             if [ $? -eq 0 ]; then
-              sudo chmod 400 /home/circleci/project/key-pair/testing-server-key.pem
-              scp -o StrictHostKeyChecking=no -i /home/circleci/project/key-pair/testing-server-key.pem -r /home/circleci/project/build/* ubuntu@ec2-44-231-136-41.us-west-2.compute.amazonaws.com:/var/www/obenan/test-build
-              ssh -o StrictHostKeyChecking=no -i /home/circleci/project/key-pair/testing-server-key.pem ubuntu@ec2-44-231-136-41.us-west-2.compute.amazonaws.com "sudo systemctl restart nginx"
+              sudo chmod 400 $TESTING_SERVER_KEY
+              scp -o StrictHostKeyChecking=no -i $TESTING_SERVER_KEY -r $PROJECT_BUILD_PATH $TESTING_SERVER_ADDRESS:$TESTING_SERVER_DEPLOY_PATH
+              ssh -o StrictHostKeyChecking=no -i $TESTING_SERVER_KEY $TESTING_SERVER_ADDRESS "sudo systemctl restart nginx"
             else
               echo "Build failed, skipping deployment."
               exit 1
