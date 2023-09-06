@@ -33,7 +33,7 @@ jobs:
             fi
           environment:
             CI: true # Set an environment variable to indicate running in CI
-      - run:
+      - run: 
           name: Deploy to EC2
           command: |
             if [ $? -eq 0 ]; then
