@@ -2,7 +2,7 @@
 
 # ================================================================
 version: 2.1
-
+ 
 jobs:
   test-build-and-deploy:
     docker:
@@ -15,6 +15,9 @@ jobs:
       - run:
           name: Install Dependencies
           command: npm install
+      - run:
+          name: Run ESLint
+          command: npm run lint:fixname ESLint
       - save_cache:
           paths:
             - node_modules
